@@ -2,478 +2,486 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Circle x Rectangle</title>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Circle x Rectangle</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+    id="MathJax-script"
+    async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+  ></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
 
-        canvas {
-            border: 2px solid #ff995e;
-            background-color: #393939;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
+    canvas {
+      border: 2px solid #ff995e;
+      background-color: #393939;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      /* largura e altura vão mudar dinamicamente no JS */
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
 
-        .controls {
-            margin-top: 10px;
-        }
+    .controls {
+      margin-top: 10px;
+    }
 
-        .controls button {
-            padding: 10px 20px;
-            margin: 0 5px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
+    .controls button {
+      padding: 10px 20px;
+      margin: 0 5px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
 
-        #playButton {
-            background-color: #4CAF50;
-            color: white;
-        }
+    #playButton {
+      background-color: #4caf50;
+      color: white;
+    }
 
-        #playButton:hover {
-            background-color: #45a049;
-        }
+    #playButton:hover {
+      background-color: #45a049;
+    }
 
-        #playButton:disabled {
-            background-color: #c1c2c1;
-        }
+    #playButton:disabled {
+      background-color: #c1c2c1;
+    }
 
-        #pauseStopButton {
-            background-color: #f44336;
-            color: white;
-            width: 120px;
-        }
+    #pauseStopButton {
+      background-color: #f44336;
+      color: white;
+      width: 120px;
+    }
 
-        #pauseStopButton:hover {
-            background-color: #da190b;
-            width: 120px;
-        }
+    #pauseStopButton:hover {
+      background-color: #da190b;
+      width: 120px;
+    }
 
-        #pauseStopButton:disabled {
-            background-color: #b4b4b4;
-            width: 120px;
-        }
+    #pauseStopButton:disabled {
+      background-color: #b4b4b4;
+      width: 120px;
+    }
 
-        #reverseButton {
-            background-color: #2196F3;
-            color: white;
-        }
+    #reverseButton {
+      background-color: #2196f3;
+      color: white;
+    }
 
-        #reverseButton:hover {
-            background-color: #0b7dda;
-        }
+    #reverseButton:hover {
+      background-color: #0b7dda;
+    }
 
-        #reverseButton:disabled {
-            background-color: #adadad;
-        }
+    #reverseButton:disabled {
+      background-color: #adadad;
+    }
 
-        .info {
-            margin-top: 10px;
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #333;
-        }
-    </style>
+    .info {
+      margin-top: 10px;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* Mensagem para girar o celular */
+    #gire-celular {
+      display: none;
+      font-weight: bold;
+      font-size: 1.4rem;
+      color: #a00;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* Se estiver no modo retrato em dispositivo com largura até 767px, esconder canvas e controles e mostrar mensagem */
+    @media screen and (max-width: 767px) and (orientation: portrait) {
+      canvas,
+      .controls,
+      .info {
+        display: none;
+      }
+
+      #gire-celular {
+        display: block;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <h2>
+    \(Math:  A_{rectangle} = b \times h = \pi r \times r = \pi r^2 = A_{circle}\)
+  </h2>
 
-    <h2>
-      \(Math:  A_{rectangle} = b \times h = \pi r \times r = \pi r^2 = A_{circle} \)
-    </h2>
+  <canvas id="unrollCanvas"></canvas>
 
-    <canvas id="unrollCanvas" width="1200" height="400"></canvas>
+  <div class="controls">
+    <button id="playButton">Play</button>
+    <button id="pauseStopButton" disabled>Pause/Stop</button>
+    <button id="reverseButton">Reverse</button>
+  </div>
+  <div class="info" id="statusInfo"></div>
 
-    <div class="controls">
-        <button id="playButton">Play</button>
-        <button id="pauseStopButton">Pause/Stop</button>
-        <button id="reverseButton">Reverse</button>
-    </div>
-    <div class="info" id="statusInfo"></div>
+  <div id="gire-celular">Por favor, gire o celular para o modo paisagem para usar esta página.</div>
 
-    <div style="display: flex;  justify-content: center; padding: 15px;">
+  <div style="display: flex; justify-content: center; padding: 15px;">
+    <form action="https://www.paypal.com/donate" method="post" target="_top">
+      <input type="hidden" name="business" value="bonoworks@gmail.com" />
+      <input type="hidden" name="no_recurring" value="0" />
+      <input type="hidden" name="item_name" value="Doação para Bonoworks" />
+      <input type="hidden" name="currency_code" value="BRL" />
+      <input
+        type="image"
+        name="submit"
+        src="https://www.paypalobjects.com/pt_BR/i/btn/btn_donate_LG.gif"
+        alt="Doar com PayPal"
+      />
+      <img
+        alt=""
+        width="1"
+        height="1"
+        src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif"
+      />
+    </form>
+  </div>
 
+  <script>
+    const canvas = document.getElementById("unrollCanvas");
+    const ctx = canvas.getContext("2d");
 
-        <form action="https://www.paypal.com/donate" method="post" target="_top">
-            <input type="hidden" name="business" value="bonoworks@gmail.com">
-            <input type="hidden" name="no_recurring" value="0">
-            <input type="hidden" name="item_name" value="Doação para Bonoworks">
-            <input type="hidden" name="currency_code" value="BRL">
-            <input type="image" name="submit" src="https://www.paypalobjects.com/pt_BR/i/btn/btn_donate_LG.gif"
-                alt="Doar com PayPal">
-            <img alt="" width="1" height="1" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif">
-        </form>
-    </div>
+    const R = 100; // Raio do círculo
+    const NUM_LINES = 360; // Número de linhas de raio
+    const TOTAL_DURATION = 30000; // 30 segundos de animação
+    const FORM_DURATION = 10000; // 10 segundos para formação
+    const TRANSFORM_DURATION = 20000; // 20 segundos para transformação
 
-    <script>
-        const canvas = document.getElementById('unrollCanvas');
-        const ctx = canvas.getContext('2d');
+    // variáveis que vão mudar conforme o canvas redimensiona
+    let W, H, circleX, circleY, rectW, rectH, rectX, rectY;
 
-        const W = canvas.width;
-        const H = canvas.height;
-        const R = 100; // Raio do círculo
-        const NUM_LINES = 360; // Número de linhas de raio
-        const TOTAL_DURATION = 30000; // 30 segundos de animação
-        const FORM_DURATION = 10000; // 10 segundos para formação
-        const TRANSFORM_DURATION = 20000; // 20 segundos para transformação
+    function ajustarTamanhoCanvas() {
+      // largura máxima 100% da janela, altura fixa proporcional a 1/3 da largura
+      W = window.innerWidth * 0.95; // 95% da largura da janela
+      H = W / 3; // proporção fixada para manter área e visual
 
-        // NOTA: Usando as coordenadas ajustadas para -200px para a esquerda
-        const circleX = W / 4 - 125;
-        const circleY = H / 2;
+      // Ajusta o tamanho físico do canvas
+      canvas.width = W;
+      canvas.height = H;
 
-        // Parâmetros do Retângulo
-        const rectW = 2 * Math.PI * R;
-        const rectH = R;
-        const rectX = W / 2 + 50 - 125;
-        const rectY = H / 2 - R / 2;
+      // Ajusta as variáveis relacionadas às formas
+      circleX = W / 4 - 125 * (W / 1200); // escala proporcional para -125 em 1200px
+      circleY = H / 2;
 
-        let startTime = null;
-        let animationFrameId = null;
-        let isPlaying = false;
-        let direction = 1; // 1 para frente, -1 para reverso
-        let progress = 0; // 0 a 1, representa o progresso da animação
+      rectW = 2 * Math.PI * R * (W / 1200); // escala proporcional ao tamanho
+      rectH = R * (H / 400);
+      rectX = W / 2 + 50 - 125 * (W / 1200);
+      rectY = H / 2 - rectH / 2;
 
+      // Redesenha com novas dimensões
+      draw(progress);
+    }
 
-        async function travarPaisagem() {
-          try {
-            await screen.orientation.lock("landscape");
-            console.log("Orientação travada em paisagem.");
-          } catch (e) {
-            console.log("Falha ao travar orientação:", e);
+    // Chamamos a função ao carregar e redimensionar
+    window.addEventListener("load", ajustarTamanhoCanvas);
+    window.addEventListener("resize", ajustarTamanhoCanvas);
+
+    let startTime = null;
+    let animationFrameId = null;
+    let isPlaying = false;
+    let direction = 1; // 1 para frente, -1 para reverso
+    let progress = 0; // 0 a 1, representa o progresso da animação
+
+    async function travarPaisagem() {
+      try {
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock("landscape");
+          console.log("Orientação travada em paisagem.");
+        }
+      } catch (e) {
+        console.log("Falha ao travar orientação:", e);
+      }
+    }
+
+    window.addEventListener("load", () => {
+      travarPaisagem();
+    });
+
+    const statusInfo = document.getElementById("statusInfo");
+
+    function easeInOut(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function updateButtonStates() {
+      if (progress === 0 || progress === 1) {
+        pauseStopButton.disabled = true;
+        pauseStopButton.textContent = "Pause/Stop";
+
+        document.getElementById("playButton").disabled = false;
+        document.getElementById("reverseButton").disabled = false;
+      } else {
+        pauseStopButton.disabled = false;
+
+        pauseStopButton.textContent = isPlaying ? "Pause/Stop" : "Continuar";
+
+        document.getElementById("playButton").disabled = false;
+        document.getElementById("reverseButton").disabled = false;
+      }
+
+      if (isPlaying) {
+        playButton.disabled = true;
+        reverseButton.disabled = true;
+      } else {
+        playButton.disabled = false;
+        reverseButton.disabled = false;
+      }
+    }
+
+    // Função principal de desenho, adaptada para variáveis dinâmicas
+    function draw(currentProgress) {
+      ctx.clearRect(0, 0, W, H);
+
+      let phase = 0;
+      let t_local = 0;
+
+      if (currentProgress < FORM_DURATION / TOTAL_DURATION) {
+        phase = 0;
+        t_local = currentProgress * (TOTAL_DURATION / FORM_DURATION);
+      } else {
+        phase = 1;
+        t_local =
+          (currentProgress - FORM_DURATION / TOTAL_DURATION) *
+          (TOTAL_DURATION / TRANSFORM_DURATION);
+      }
+
+      ctx.beginPath();
+      ctx.arc(circleX, circleY, R * (H / 400), 0, 2 * Math.PI);
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#fff";
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.rect(rectX, rectY, rectW, rectH);
+      ctx.fillStyle = "#fff";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(rectX, rectY, rectW, rectH);
+
+      for (let i = 0; i < NUM_LINES; i++) {
+        const angle = (i / NUM_LINES) * 2 * Math.PI;
+
+        if (phase === 0) {
+          const numVisibleRays = Math.floor(t_local * NUM_LINES);
+          if (i >= numVisibleRays) continue;
+
+          ctx.beginPath();
+          ctx.moveTo(circleX, circleY);
+          ctx.lineTo(
+            circleX + R * (H / 400) * Math.cos(angle),
+            circleY + R * (H / 400) * Math.sin(angle)
+          );
+          if (i === 0) {
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 3;
+          } else {
+            ctx.strokeStyle = `hsl(${(i / NUM_LINES) * 360}, 70%, 50%)`;
+            ctx.lineWidth = 1;
+          }
+          ctx.stroke();
+        } else {
+          const delay = (i / NUM_LINES) * (TRANSFORM_DURATION - 2000) / TRANSFORM_DURATION;
+          const moveDuration = 2000 / TRANSFORM_DURATION;
+
+          if (t_local >= delay) {
+            const t_move = Math.min(1, (t_local - delay) / moveDuration);
+            const t_ease = easeInOut(t_move);
+
+            const startX = circleX;
+            const startY = circleY;
+            const endX = circleX + R * (H / 400) * Math.cos(angle);
+            const endY = circleY + R * (H / 400) * Math.sin(angle);
+
+            const finalX = rectX + (i / NUM_LINES) * rectW;
+            const finalY1 = rectY;
+            // const finalY2 = rectY + rectH; // não usado
+
+            const currentAngle = angle * (1 - t_ease) + (Math.PI / 2) * t_ease;
+
+            const currentX = startX + (finalX - startX) * t_ease;
+            const currentY = startY + (finalY1 - startY) * t_ease;
+
+            ctx.beginPath();
+            ctx.moveTo(currentX, currentY);
+            ctx.lineTo(
+              currentX + R * (H / 400) * Math.cos(currentAngle),
+              currentY + R * (H / 400) * Math.sin(currentAngle)
+            );
+
+            if (i === 0) {
+              ctx.strokeStyle = "red";
+              ctx.lineWidth = 3;
+            } else {
+              ctx.strokeStyle = `hsl(${(i / NUM_LINES) * 360}, 70%, 50%)`;
+              ctx.lineWidth = 1;
+            }
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.moveTo(circleX, circleY);
+            ctx.lineTo(
+              circleX + R * (H / 400) * Math.cos(angle),
+              circleY + R * (H / 400) * Math.sin(angle)
+            );
+
+            if (i === 0) {
+              ctx.strokeStyle = "red";
+              ctx.lineWidth = 3;
+            } else {
+              ctx.strokeStyle = `hsl(${(i / NUM_LINES) * 360}, 70%, 50%)`;
+              ctx.lineWidth = 1;
+            }
+            ctx.stroke();
           }
         }
+      }
 
-        window.addEventListener('load', () => {
-          travarPaisagem();
-        });
+      let statusText = `Progress: ${(currentProgress * 100).toFixed(1)}% | `;
+      if (phase === 0) {
+        statusText += `Phase 1: Circle Formation (${Math.floor(t_local * 100)}%)`;
+      } else {
+        statusText += `Phase 2: Rectangle Transformation (${Math.floor(t_local * 100)}%) | Height = r, Width = 2\u03c0r`;
+      }
+      statusInfo.textContent = statusText;
+    }
 
-        const statusInfo = document.getElementById('statusInfo');
+    function animate(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
 
-        // Função de interpolação (ease-in-out)
-        function easeInOut(t) {
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-        }
+      let timeFraction = elapsed / TOTAL_DURATION;
 
-        function updateButtonStates() {
-            // 1. Condição para DESABILITAR o Pause/Stop:
-            //    A animação está totalmente parada (no início: progress=0) OU (no fim: progress=1).
-            if (progress === 0 || progress === 1) {
-                pauseStopButton.disabled = true;
-                pauseStopButton.textContent = 'Pause/Stop';
+      if (direction === -1) {
+        progress = 1 - Math.min(1, timeFraction);
+      } else {
+        progress = Math.min(1, timeFraction);
+      }
 
-                // Habilita Play/Reverse para poder começar
-                document.getElementById('playButton').disabled = false;
-                document.getElementById('reverseButton').disabled = false;
+      draw(progress);
 
-            } else {
-                // 2. Condição para HABILITAR o Pause/Stop:
-                //    A animação está tocando (isPlaying=true) OU está pausada (0 < progress < 1).
-                pauseStopButton.disabled = false;
-
-                // Atualiza o texto do botão
-                pauseStopButton.textContent = isPlaying ? 'Pause/Stop' : 'Continuar';
-
-                // O Play e o Reverse devem ser habilitados se não estiver tocando
-                document.getElementById('playButton').disabled = false;
-                document.getElementById('reverseButton').disabled = false;
-            }
-
-            if (isPlaying) {
-                // Se estiver rodando, desabilita Play e Reverse
-                playButton.disabled = true;
-                reverseButton.disabled = true;
-            } else {
-                // Se estiver pausado ou parado, habilita Play e Reverse
-                playButton.disabled = false;
-                reverseButton.disabled = false;
-            }
-        }
-        // Função principal de desenho
-        function draw(currentProgress) {
-            // Opção 1 (Preencher o fundo com uma cor):
-            // ctx.fillStyle = '#E0E0E0'; 
-            // ctx.fillRect(0, 0, W, H);
-
-            // Opção 2 (Limpar se estiver usando CSS para o background):
-            ctx.clearRect(0, 0, W, H);
-
-            // 1. Determinar a fase e o progresso local
-            let phase = 0; // 0: Formação, 1: Transformação
-            let t_local = 0; // Progresso local (0 a 1)
-
-            if (currentProgress < FORM_DURATION / TOTAL_DURATION) {
-                // Fase 1: Formação do Círculo (0-10s)
-                phase = 0;
-                t_local = currentProgress * (TOTAL_DURATION / FORM_DURATION); // 0 a 1
-            } else {
-                // Fase 2: Transformação para Retângulo (10-30s)
-                phase = 1;
-                t_local = (currentProgress - FORM_DURATION / TOTAL_DURATION) * (TOTAL_DURATION / TRANSFORM_DURATION); // 0 a 1
-            }
-
-            // Desenha o contorno do círculo (para referência)
-            ctx.beginPath();
-            ctx.arc(circleX, circleY, R, 0, 2 * Math.PI);
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.fillStyle = '#fff';
-            ctx.fill();
-
-            // Desenha o contorno do retângulo final (para referência)
-            ctx.beginPath();
-            ctx.rect(rectX, rectY, rectW, rectH);
-            ctx.fillStyle = '#fff'; // Define a cor de preenchimento branca
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(rectX, rectY, rectW, rectH);
-
-            // Desenha as linhas de raio
-            for (let i = 0; i < NUM_LINES; i++) {
-                const angle = (i / NUM_LINES) * 2 * Math.PI;
-
-                let isVisible = true;
-
-                if (phase === 0) {
-                    // --- Fase 1: Formação do Círculo (0-10s) ---
-                    const numVisibleRays = Math.floor(t_local * NUM_LINES);
-                    if (i >= numVisibleRays) {
-                        isVisible = false;
-                    } else {
-                        ctx.beginPath();
-                        ctx.moveTo(circleX, circleY);
-                        ctx.lineTo(circleX + R * Math.cos(angle), circleY + R * Math.sin(angle));
-                        if (i === 0) {
-                            ctx.strokeStyle = 'red';
-                            ctx.lineWidth = 3;
-                        } else {
-                            ctx.strokeStyle = `hsl(${(i / NUM_LINES) * 360}, 70%, 50%)`;
-                            ctx.lineWidth = 1;
-                        }
-                        ctx.stroke();
-                    }
-                } else {
-                    // --- Fase 2: Transformação para Retângulo (10-30s) ---
-                    const delay = (i / NUM_LINES) * (TRANSFORM_DURATION - 2000) / TRANSFORM_DURATION; // Atraso de 0 a 18s
-                    const moveDuration = 2000 / TRANSFORM_DURATION; // Duração do movimento de 2s
-
-                    if (t_local >= delay) {
-                        const t_move = Math.min(1, (t_local - delay) / moveDuration);
-                        const t_ease = easeInOut(t_move);
-
-                        // Posição do raio no círculo
-                        const startX = circleX;
-                        const startY = circleY;
-                        const endX = circleX + R * Math.cos(angle);
-                        const endY = circleY + R * Math.sin(angle);
-
-                        // Posição final no retângulo
-                        const finalX = rectX + (i / NUM_LINES) * rectW;
-                        const finalY1 = rectY;
-                        const finalY2 = rectY + rectH;
-
-                        // Interpolação da rotação
-                        const currentAngle = angle * (1 - t_ease) + (Math.PI / 2) * t_ease;
-
-                        // Interpolação da posição
-                        const currentX = startX + (finalX - startX) * t_ease;
-                        const currentY = startY + (finalY1 - startY) * t_ease;
-
-                        ctx.beginPath();
-                        ctx.moveTo(currentX, currentY);
-                        ctx.lineTo(currentX + R * Math.cos(currentAngle), currentY + R * Math.sin(currentAngle));
-
-                        if (i === 0) {
-                            ctx.strokeStyle = 'red';
-                            ctx.lineWidth = 3;
-                        } else {
-                            ctx.strokeStyle = `hsl(${(i / NUM_LINES) * 360}, 70%, 50%)`;
-                            ctx.lineWidth = 1;
-                        }
-                        ctx.stroke();
-                    } else {
-                        // Desenha o raio parado no círculo
-                        ctx.beginPath();
-                        ctx.moveTo(circleX, circleY);
-                        ctx.lineTo(circleX + R * Math.cos(angle), circleY + R * Math.sin(angle));
-                        if (i === 0) {
-                            ctx.strokeStyle = 'red';
-                            ctx.lineWidth = 3;
-                        } else {
-                            ctx.strokeStyle = `hsl(${(i / NUM_LINES) * 360}, 70%, 50%)`;
-                            ctx.lineWidth = 1;
-                        }
-                        ctx.stroke();
-                    }
-                }
-            }
-
-            // Informações de status
-            let statusText = `Progress: ${(currentProgress * 100).toFixed(1)}% | `;
-            if (phase === 0) {
-                statusText += `Phase 1: Circle Formation (${Math.floor(t_local * 100)}%)`;
-            } else {
-                statusText += `Phase 2: Rectangle Transformation (${Math.floor(t_local * 100)}%) | Height = r, Width = 2\u03c0r`;
-            }
-            statusInfo.textContent = statusText;
-        }
-
-        // --- Funções de Controle (Ajustadas para Resume) ---
-
-        function animate(timestamp) {
-            // Se `startTime` for null (início fresco), ele é inicializado aqui.
-            // Se `startTime` já tiver um valor (retomada da pausa), ele mantém esse valor.
-            if (!startTime) startTime = timestamp;
-            const elapsed = timestamp - startTime;
-
-            let timeFraction = elapsed / TOTAL_DURATION;
-
-            if (direction === -1) {
-                progress = 1 - Math.min(1, timeFraction);
-            } else {
-                progress = Math.min(1, timeFraction);
-            }
-
-            draw(progress);
-
-            if ((direction === 1 && progress < 1) || (direction === -1 && progress > 0)) {
-                animationFrameId = requestAnimationFrame(animate);
-            } else {
-                isPlaying = false;
-                startTime = null; // Reinicia o tempo para o próximo ciclo
-                draw(direction === 1 ? 1 : 0);
-                updateButtonStates();
-            }
-        }
-
-        // [MODIFICADO] 1. A função startAnimation() não deve mais zerar o tempo,
-        // apenas iniciar o loop, confiando que quem a chamou configurou 'startTime'.
-        function startAnimation() {
-            if (isPlaying) return;
-            isPlaying = true;
-            // Linha 'startTime = null;' REMOVIDA
-            animationFrameId = requestAnimationFrame(animate);
-            updateButtonStates();
-        }
-
-        function pauseAnimation() {
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
-                isPlaying = false;
-            }
-            updateButtonStates();
-        }
-
-        // [MODIFICADO] 2. A função agora só faz PAUSE ou RESUME (mantendo a direção).
-        // O logic de "Stop/Start Fresh" foi removido.
-        function togglePauseStop() {
-            if (isPlaying) {
-                pauseAnimation();
-                document.getElementById('pauseStopButton').textContent = 'Continuar';
-            } else {
-                // RESUME (apenas se estiver entre 0 e 1, ou seja, pausado)
-                if (progress > 0 && progress < 1) {
-                    const currentProgressTime = (direction === 1 ? progress : 1 - progress) * TOTAL_DURATION;
-                    startTime = performance.now() - currentProgressTime;
-                    startAnimation();
-                    document.getElementById('pauseStopButton').textContent = 'Pause/Stop';
-                }
-                // Se progress for 0 ou 1, faz nada (o usuário deve usar Play/Reverse para recomeçar)
-            }
-        }
-
-        // [MODIFICADO] 3. A função Reverse agora também pode ser usada para RESUME (retomar) no sentido inverso.
-        function reverseAnimation() {
-            direction *= -1;
-
-            if (!isPlaying) {
-                // Lógica de RESUME a partir do progresso atual, mas com a nova direção
-                const currentProgressTime = (direction === 1 ? progress : 1 - progress) * TOTAL_DURATION;
-                startTime = performance.now() - currentProgressTime;
-                startAnimation();
-            } else {
-                // Se estiver rodando, apenas ajusta o startTime para uma inversão suave
-                const currentProgressTime = (direction === 1 ? progress : 1 - progress) * TOTAL_DURATION;
-                startTime = performance.now() - currentProgressTime;
-            }
-
-            document.getElementById('pauseStopButton').textContent = 'Pause/Stop';
-        }
-
-
-        // --- Event Listeners (Ajustados para o novo comportamento) ---
-
-        // [MODIFICADO] Play/Resume: Agora retoma se estiver pausado, ou zera se estiver parado.
-        document.getElementById('playButton').addEventListener('click', () => {
-            if (isPlaying) return;
-
-            direction = 1;
-
-            if (progress === 0 || progress === 1) {
-                progress = 0;
-                startTime = null;
-            } else {
-                const currentProgressTime = progress * TOTAL_DURATION;
-                startTime = performance.now() - currentProgressTime;
-            }
-
-            startAnimation();
-
-            // NOVO: Habilita o botão Imediatamente ao dar Play
-            document.getElementById('pauseStopButton').disabled = false;
-            document.getElementById('pauseStopButton').textContent = 'Pause/Stop';
-
-            // A linha abaixo é importante manter
-            // document.getElementById('pauseStopButton').textContent = 'Pause/Stop';
-        });
-
-        document.getElementById('pauseStopButton').addEventListener('click', togglePauseStop);
-
-        // Reverse/Resume: O `reverseAnimation` já implementa o Resume, mas adicionamos a lógica de "Start Fresh"
-        document.getElementById('reverseButton').addEventListener('click', () => {
-            if (isPlaying) {
-                // Se estiver rodando, apenas inverte a direção
-                reverseAnimation();
-            } else {
-                // Se estiver parado, define a direção para -1 e o progress para 1 (fim) para iniciar o REVERSO
-                if (progress === 0 || progress === 1) {
-                    direction = -1;
-                    progress = 1;
-                    startTime = null;
-                    startAnimation();
-
-                    // NOVO: Habilita o botão Imediatamente ao dar Reverse Start
-                    document.getElementById('pauseStopButton').disabled = false;
-                    document.getElementById('pauseStopButton').textContent = 'Pause/Stop';
-                } else {
-                    // Se estiver pausado, chama a função que já faz o RESUME REVERSO
-                    reverseAnimation();
-                }
-            }
-        });
-        // Desenha o estado inicial (vazio)
-        draw(0);
+      if ((direction === 1 && progress < 1) || (direction === -1 && progress > 0)) {
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
+        isPlaying = false;
+        startTime = null;
+        draw(direction === 1 ? 1 : 0);
         updateButtonStates();
-    </script>
+      }
+    }
 
+    function startAnimation() {
+      if (isPlaying) return;
+      isPlaying = true;
+      animationFrameId = requestAnimationFrame(animate);
+      updateButtonStates();
+    }
+
+    function pauseAnimation() {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+        isPlaying = false;
+      }
+      updateButtonStates();
+    }
+
+    function togglePauseStop() {
+      if (isPlaying) {
+        pauseAnimation();
+        document.getElementById("pauseStopButton").textContent = "Continuar";
+      } else {
+        if (progress > 0 && progress < 1) {
+          const currentProgressTime = (direction === 1 ? progress : 1 - progress) * TOTAL_DURATION;
+          startTime = performance.now() - currentProgressTime;
+          startAnimation();
+          document.getElementById("pauseStopButton").textContent = "Pause/Stop";
+        }
+      }
+    }
+
+    function reverseAnimation() {
+      direction *= -1;
+
+      if (!isPlaying) {
+        const currentProgressTime = (direction === 1 ? progress : 1 - progress) * TOTAL_DURATION;
+        startTime = performance.now() - currentProgressTime;
+        startAnimation();
+      } else {
+        const currentProgressTime = (direction === 1 ? progress : 1 - progress) * TOTAL_DURATION;
+        startTime = performance.now() - currentProgressTime;
+      }
+
+      document.getElementById("pauseStopButton").textContent = "Pause/Stop";
+    }
+
+    document.getElementById("playButton").addEventListener("click", () => {
+      if (isPlaying) return;
+
+      direction = 1;
+
+      if (progress === 0 || progress === 1) {
+        progress = 0;
+        startTime = null;
+      } else {
+        const currentProgressTime = progress * TOTAL_DURATION;
+        startTime = performance.now() - currentProgressTime;
+      }
+
+      startAnimation();
+
+      document.getElementById("pauseStopButton").disabled = false;
+      document.getElementById("pauseStopButton").textContent = "Pause/Stop";
+    });
+
+    document.getElementById("pauseStopButton").addEventListener("click", togglePauseStop);
+
+    document.getElementById("reverseButton").addEventListener("click", () => {
+      if (isPlaying) {
+        reverseAnimation();
+      } else {
+        if (progress === 0 || progress === 1) {
+          direction = -1;
+          progress = 1;
+          startTime = null;
+          startAnimation();
+
+          document.getElementById("pauseStopButton").disabled = false;
+          document.getElementById("pauseStopButton").textContent = "Pause/Stop";
+        } else {
+          reverseAnimation();
+        }
+      }
+    });
+
+    draw(0);
+    updateButtonStates();
+  </script>
 </body>
 
 </html>
