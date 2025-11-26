@@ -149,6 +149,20 @@
         let direction = 1; // 1 para frente, -1 para reverso
         let progress = 0; // 0 a 1, representa o progresso da animação
 
+
+        async function travarPaisagem() {
+          try {
+            await screen.orientation.lock("landscape");
+            console.log("Orientação travada em paisagem.");
+          } catch (e) {
+            console.log("Falha ao travar orientação:", e);
+          }
+        }
+
+        window.addEventListener('load', () => {
+          travarPaisagem();
+        });
+
         const statusInfo = document.getElementById('statusInfo');
 
         // Função de interpolação (ease-in-out)
