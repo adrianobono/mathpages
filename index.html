@@ -10,7 +10,21 @@
     id="MathJax-script"
     async
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+
+    const typebotInitScript = document.createElement("script");
+typebotInitScript.type = "module";
+typebotInitScript.innerHTML = `import Typebot from 'https://cdn.jsdelivr.net/npm/@typebot.io/js@0/dist/web.js'
+  
+Typebot.initStandard({
+  typebot: "talk1-nwg2qrv",
+  apiHost: "https://chat4ai.duckdns.org",
+});
+`;
+document.body.append(typebotInitScript);
+
   ></script>
+
+  
   <style>
     body {
       display: flex;
